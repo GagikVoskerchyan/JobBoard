@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+
+  <!-- ✅ Profile Card -->
+  <div class="row mb-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm">
+        {% if user.profile.profile_picture %}
+          <img src="{{ user.profile.profile_picture.url }}" class="card-img-top" style="max-height: 200px; object-fit: cover;" alt="Profile Picture">
+        {% else %}
+          <img src="https://via.placeholder.com/150" class="card-img-top" style="max-height: 200px; object-fit: cover;" alt="Default Pic">
+        {% endif %}
+        <div class="card-body">
+          <h5 class="card-title">{{ user.username }}</h5>
+          <p class="card-text">{{ user.profile.bio|default:"No bio yet." }}</p>
+        
+          {% if user.profile.resume %}
+            <p>
+              <strong>Resume:</strong>
+              <a href="{{ user.profile.resume.url }}" target="_blank" class="btn btn-sm btn-outline-success mt-2">View / Download Resume</a>
+            </p>
+          {% else %}
+            <p><strong>Resume:</strong> <em>No resume uploaded yet.</em></p>
+          {% endif %}
+        
+          <a href="{% url 'edit_profile' %}" class="btn btn-sm btn-outline-primary mt-2">Edit Profile</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Job Applications -->
+    <div class="col-md-8">
+      <h2 class="mb-4">Jobs You Applied To</h2>
+      {% if applications %}
+        <div class="row">
+          {% for application in applications %}
+            <div class="col-md-12">
+              <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                  <h5 class="card-title">{{ application.job.title }}</h5>
+                  <p class="card-text">
+                    Company: <strong>{{ application.job.company }}</strong><br>
+                    Location: {{ application.job.location }}<br>
+                    Status: <span class="badge bg-success">Applied</span>
+                  </p>
+                  <a href="{% url 'job_detail' application.job.id %}" class="btn btn-outline-primary btn-sm me-2">View Job</a>
+                  <a href="{% url 'delete_application' application.id %}" class="btn btn-outline-danger btn-sm"
+                     onclick="return confirm('Are you sure you want to delete this application?');">Delete</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="alert alert-info">You haven't applied to any jobs yet.</div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

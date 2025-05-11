@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<h2>Register</h2>
+
+<!-- Show form errors if any -->
+{% if form.errors %}
+  <div class="alert alert-danger">
+    {% for field in form %}
+      {% if field.errors %}
+        <p><strong>{{ field.label }}:</strong> {{ field.errors|striptags }}</p>
+      {% endif %}
+    {% endfor %}
+    {% if form.non_field_errors %}
+      <p><strong>Error:</strong> {{ form.non_field_errors|striptags }}</p>
+    {% endif %}
+  </div>
+{% endif %}
+
+<form method="POST">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit" class="btn btn-primary">Register</button>
+</form>
+{% endblock %}

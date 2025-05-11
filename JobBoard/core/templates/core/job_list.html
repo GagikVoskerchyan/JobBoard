@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Available Jobs</h2>
+  
+  {% if jobs %}
+    <ul class="list-group shadow-sm">
+      {% for job in jobs %}
+        <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+          <div>
+            <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark">
+              <h5 class="mb-1">{{ job.title }}</h5>
+              <p class="mb-0 text-muted">{{ job.company }} — {{ job.location }}</p>
+            </a>
+          </div>
+          <span class="badge bg-primary rounded-pill">View</span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-info text-center" role="alert">
+      No jobs available right now. Please check back later.
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

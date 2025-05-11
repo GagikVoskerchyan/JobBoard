@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="card shadow-lg">
+    <div class="card-body">
+      <h2 class="card-title">{{ job.title }}</h2>
+      <h5 class="card-subtitle mb-2 text-muted">{{ job.company }} — {{ job.location }}</h5>
+
+      <hr>
+      <h4>Apply for this job</h4>
+      <form method="post" enctype="multipart/form-data" class="mt-3">
+         {% csrf_token %}
+         {{ form.as_p }}
+         <button type="submit" class="btn btn-primary">Submit Application</button>
+      </form>
+
+      <p class="card-text"><strong>Type:</strong> {{ job.job_type }}</p>
+      <p class="card-text"><strong>Salary:</strong> {{ job.salary }}</p>
+      <p class="card-text"><strong>Description:</strong></p>
+      <p>{{ job.description }}</p>
+
+      <a href="{% url 'home' %}" class="btn btn-outline-secondary mt-3">← Back to Job Listings</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
