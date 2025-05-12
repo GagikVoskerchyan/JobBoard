@@ -5,10 +5,15 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
+from django.core.mail import send_mail
+from django.contrib.auth.models import User
 
-from .forms import RegisterForm, JobForm, ApplicationForm, ProfileForm
+
+from .forms import RegisterForm, JobForm, ApplicationForm, ProfileForm, MessageForm
 from .models import Job, Application, Profile
 from .models import EmployerProfile, SeekerProfile
+from .models import Message  # add this import
+
 
 class ApplicationListView(LoginRequiredMixin, ListView):
     model = Application
@@ -49,6 +54,7 @@ def job_detail_view(request, job_id):
         if form.is_valid():
             application = form.save(commit=False)
             application.job = job
+            application.user = request.user  # ✅ FIX HERE
             application.save()
             messages.success(request, "Application submitted successfully!")
             return redirect('job_detail', job_id=job.id)
@@ -56,6 +62,7 @@ def job_detail_view(request, job_id):
         form = ApplicationForm()
 
     return render(request, 'core/job_detail.html', {'job': job, 'form': form})
+
 
 def application_list_view(request):
     applications = Application.objects.all().order_by('-applied_at')
@@ -163,3 +170,62 @@ def delete_application(request, application_id):
     return redirect('application_list')
 
 
+@login_required
+def view_applicants(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    applicants = Application.objects.filter(job=job)
+    return render(request, 'core/view_applicants.html', {'job': job, 'applicants': applicants})
+
+
+@login_required
+def edit_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id, posted_by=request.user)
+
+    if request.method == 'POST':
+        form = JobForm(request.POST, instance=job)
+        if form.is_valid():
+            form.save()
+            return redirect('employer_dashboard')
+    else:
+        form = JobForm(instance=job)
+
+    return render(request, 'jobs/edit_job.html', {'form': form})
+
+
+@login_required
+def delete_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id, posted_by=request.user)
+
+    if request.method == 'POST':
+        job.delete()
+        return redirect('employer_dashboard')
+
+    return render(request, 'jobs/delete_job.html', {'job': job})
+
+@login_required
+def message_applicant(request, applicant_id):
+    applicant = get_object_or_404(User, id=applicant_id)
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            subject = form.cleaned_data['subject']
+            body = form.cleaned_data['message']
+
+            Message.objects.create(
+                sender=request.user,
+                recipient=applicant,
+                subject=subject,
+                body=body,
+            )
+
+            messages.success(request, "Message sent!")
+            return redirect('employer_dashboard')
+    else:
+        form = MessageForm()
+
+    return render(request, 'applications/message_applicant.html', {'form': form, 'applicant': applicant})
+
+@login_required
+def inbox(request):
+    messages = Message.objects.filter(recipient=request.user).order_by('-sent_at')
+    return render(request, 'messages/inbox.html', {'messages': messages})

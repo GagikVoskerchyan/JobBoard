@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Inbox</h2>
+<ul class="list-group mt-3">
+  {% for msg in messages %}
+    <li class="list-group-item">
+      <strong>From:</strong> {{ msg.sender.username }}<br>
+      <strong>Subject:</strong> {{ msg.subject }}<br>
+      <small>{{ msg.sent_at }}</small>
+      <p>{{ msg.body }}</p>
+    </li>
+  {% empty %}
+    <li class="list-group-item">No messages.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

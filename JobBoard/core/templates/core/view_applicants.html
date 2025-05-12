@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Applicants for "{{ job.title }}"</h2>
+
+  <ul class="list-group mt-4">
+    {% for app in applicants %}
+      <li class="list-group-item">
+        <strong>{{ app.name }}</strong> - {{ app.user.email }} <br>
+        <small>Applied at: {{ app.applied_at }}</small><br>
+
+        {% if app.user.profile.resume %}
+          <a href="{{ app.user.profile.resume.url }}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">
+            Download Resume
+          </a>
+        {% else %}
+          <span class="text-muted mt-2 d-block">No resume</span>
+        {% endif %}
+
+        <a href="{% url 'message_applicant' app.user.id %}" class="btn btn-sm btn-outline-primary mt-2">
+          Message Applicant
+        </a>
+      </li>
+    {% empty %}
+      <li class="list-group-item">No applicants found for this job.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

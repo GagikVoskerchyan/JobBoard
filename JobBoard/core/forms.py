@@ -40,3 +40,7 @@ class ProfileForm(forms.ModelForm):
         if resume and not resume.name.endswith('.pdf'):
             raise forms.ValidationError("Only PDF files are allowed.")
         return resume
+    
+class MessageForm(forms.Form):
+    subject = forms.CharField(max_length=100)
+    message = forms.CharField(widget=forms.Textarea)
