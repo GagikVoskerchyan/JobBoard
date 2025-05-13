@@ -1,30 +1,45 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>My Job Applications</h2>
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">My Job Applications</h2>
 
-<ul class="list-group mt-4">
-  {% for app in applications %}
-    <li class="list-group-item">
-      <strong>You applied to:</strong>
-      <a href="{% url 'job_detail' app.job.id %}">{{ app.job.title }}</a> at {{ app.job.company }}<br>
-      <small>Applied on: {{ app.applied_at }}</small><br>
+  {% if applications %}
+    <div class="list-group">
+      {% for app in applications %}
+        <div class="list-group-item py-3">
+          <div class="d-flex justify-content-between align-items-start flex-column flex-md-row">
+            <div class="me-3">
+              <h5 class="mb-1">
+                <strong>You applied to:</strong>
+                <a href="{% url 'job_detail' app.job.id %}" class="text-decoration-none">
+                  {{ app.job.title }}
+                </a> at {{ app.job.company }}
+              </h5>
+              <small class="text-muted">Applied on: {{ app.applied_at|date:"F j, Y" }}</small>
 
-      {% if app.resume %}
-        <a href="{{ app.resume.url }}" target="_blank" class="btn btn-sm btn-outline-secondary mt-2">
-          View My Submitted Resume
-        </a>
-      {% else %}
-        <span class="text-muted mt-2 d-block">You didn’t upload a resume.</span>
-      {% endif %}
+              <div class="mt-3">
+                {% if app.resume %}
+                  <a href="{{ app.resume.url }}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                    View Submitted Resume
+                  </a>
+                {% else %}
+                  <span class="text-muted">You didn’t upload a resume.</span>
+                {% endif %}
 
-      <a href="{% url 'withdraw_application' app.id %}" class="btn btn-sm btn-danger mt-2 ms-2">
-        Withdraw
-      </a>
-    </li>
-  {% empty %}
-    <li class="list-group-item">You haven’t submitted any applications yet.</li>
-  {% endfor %}
-</ul>
-
+                <a href="{% url 'withdraw_application' app.id %}" class="btn btn-danger btn-sm ms-2">
+                  Withdraw
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">
+      You haven’t submitted any applications yet.
+    </div>
+  {% endif %}
+</div>
 {% endblock %}

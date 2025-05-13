@@ -1,9 +1,24 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
 {% block content %}
-  <h2>Message {{ applicant.username }}</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Send</button>
-  </form>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title mb-4 text-center">✉️ Message {{ applicant.username }}</h3>
+
+          <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <div class="d-grid mt-3">
+              <button type="submit" class="btn btn-primary">Send Message</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

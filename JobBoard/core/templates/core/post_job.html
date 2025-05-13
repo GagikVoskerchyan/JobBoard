@@ -2,10 +2,28 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h2>Post a New Job</h2>
-<form method="post">
-    {% csrf_token %}
-    {{ form|crispy }}
-    <button type="submit" class="btn btn-primary">Post Job</button>
-</form>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-lg">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">📢 Post a New Job</h3>
+
+          <form method="post">
+            {% csrf_token %}
+            {{ form|crispy }}
+
+            <div class="d-grid mt-4">
+              <button type="submit" class="btn btn-primary">✅ Post Job</button>
+            </div>
+          </form>
+
+          <div class="text-center mt-3">
+            <a href="{% url 'employer_dashboard' %}" class="btn btn-sm btn-outline-secondary">← Back to Dashboard</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}

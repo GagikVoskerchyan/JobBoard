@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">📤 Sent Messages</h2>
+
+  {% if messages %}
+    <div class="list-group">
+      {% for msg in messages %}
+        <div class="list-group-item mb-3 shadow-sm">
+          <h5 class="mb-1">To: {{ msg.recipient.username }}</h5>
+          <p class="mb-1"><strong>Subject:</strong> {{ msg.subject }}</p>
+          <p class="mb-1"><strong>Sent at:</strong> {{ msg.sent_at|date:"M d, Y H:i" }}</p>
+          <p class="mb-0">{{ msg.body }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">No sent messages.</div>
+  {% endif %}
+</div>
+{% endblock %}

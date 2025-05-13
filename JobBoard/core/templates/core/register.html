@@ -2,25 +2,41 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
-<h2>Register</h2>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 class="card-title text-center mb-4">📝 Create an Account</h3>
 
-<!-- Show form errors if any -->
-{% if form.errors %}
-  <div class="alert alert-danger">
-    {% for field in form %}
-      {% if field.errors %}
-        <p><strong>{{ field.label }}:</strong> {{ field.errors|striptags }}</p>
-      {% endif %}
-    {% endfor %}
-    {% if form.non_field_errors %}
-      <p><strong>Error:</strong> {{ form.non_field_errors|striptags }}</p>
-    {% endif %}
+          {% if form.errors %}
+            <div class="alert alert-danger">
+              {% for field in form %}
+                {% if field.errors %}
+                  <p><strong>{{ field.label }}:</strong> {{ field.errors|striptags }}</p>
+                {% endif %}
+              {% endfor %}
+              {% if form.non_field_errors %}
+                <p><strong>Error:</strong> {{ form.non_field_errors|striptags }}</p>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          <form method="POST">
+            {% csrf_token %}
+            {{ form|crispy }}
+
+            <div class="d-grid mt-3">
+              <button type="submit" class="btn btn-primary">Register</button>
+            </div>
+          </form>
+
+          <p class="text-center mt-3">
+            Already have an account? <a href="{% url 'login' %}">Login here</a>
+          </p>
+        </div>
+      </div>
+    </div>
   </div>
-{% endif %}
-
-<form method="POST">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit" class="btn btn-primary">Register</button>
-</form>
+</div>
 {% endblock %}

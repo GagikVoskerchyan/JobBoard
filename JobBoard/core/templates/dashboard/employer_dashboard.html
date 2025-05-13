@@ -4,62 +4,64 @@
 <div class="container mt-5">
 
   <div class="row mb-4">
-    <!-- Profile + Company Info -->
-    <div class="col-md-4">
-      <div class="card mb-4 shadow-sm">
+    <div class="col-lg-4 mb-4">
+      <div class="card shadow-sm h-100">
         {% if user.profile.profile_picture %}
-          <img src="{{ user.profile.profile_picture.url }}" class="card-img-top" alt="Profile Picture">
+          <img src="{{ user.profile.profile_picture.url }}" class="card-img-top img-fluid" style="object-fit: cover; height: 200px;" alt="Profile Picture">
         {% else %}
-          <img src="https://via.placeholder.com/300" class="card-img-top" alt="Default Pic">
+          <img src="https://via.placeholder.com/300" class="card-img-top img-fluid" style="object-fit: cover; height: 200px;" alt="Default Pic">
         {% endif %}
         <div class="card-body">
           <h5 class="card-title">{{ user.username }}</h5>
-          <p class="card-text">{{ user.profile.bio }}</p>
-          <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm mb-2">Edit Profile</a>
+          <p class="card-text">{{ user.profile.bio|default:"No bio yet." }}</p>
+
+          <a href="{% url 'edit_profile' %}" class="btn btn-sm btn-outline-primary mb-3">✏️ Edit Profile</a>
 
           {% with user.employerprofile as employer %}
             {% if employer.company_name %}
-              <p><strong>Company:</strong> {{ employer.company_name }}</p>
+              <p><strong>🏢 Company:</strong> {{ employer.company_name }}</p>
             {% endif %}
             {% if employer.description %}
               <p>{{ employer.description }}</p>
             {% endif %}
             {% if employer.logo %}
-              <img src="{{ employer.logo.url }}" alt="Company Logo" class="img-fluid mt-2">
+              <img src="{{ employer.logo.url }}" class="img-fluid mt-2" alt="Company Logo">
             {% endif %}
-            <a href="{% url 'edit_employer_profile' %}" class="btn btn-sm btn-outline-primary mt-2">Edit Company Info</a>
+            <a href="{% url 'edit_employer_profile' %}" class="btn btn-sm btn-outline-secondary mt-2">🏗️ Edit Company Info</a>
           {% endwith %}
         </div>
       </div>
     </div>
 
-    <!-- Posted Jobs -->
-    <div class="col-md-8">
-      <h2 class="mb-4">Jobs You Posted</h2>
+    <div class="col-lg-8">
+      <h2 class="mb-4 text-center text-lg-start">Jobs You Posted</h2>
 
       {% if jobs %}
         <div class="row">
           {% for job in jobs %}
-            <div class="col-md-12">
-              <div class="card mb-3 shadow-sm">
+            <div class="col-12 mb-3">
+              <div class="card shadow-sm">
                 <div class="card-body">
                   <h5 class="card-title">{{ job.title }}</h5>
-                  <p class="card-text">
-                    Company: <strong>{{ job.company }}</strong><br>
-                    Location: {{ job.location }}<br>
-                    Category: {{ job.category }}
+                  <p class="card-text mb-2">
+                    <strong>Company:</strong> {{ job.company }}<br>
+                    <strong>Location:</strong> {{ job.location }}<br>
+                    <strong>Category:</strong> {{ job.category }}
                   </p>
-                  <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary btn-sm">View Job</a>
-                  <a href="{% url 'view_applicants' job.id %}" class="btn btn-outline-success btn-sm">View Applicants</a>
-                  <a href="{% url 'edit_job' job.id %}">Edit</a> |
-                  <a href="{% url 'delete_job' job.id %}">Delete</a>
+                  <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'job_detail' job.id %}" class="btn btn-sm btn-outline-primary">🔍 View</a>
+                    <a href="{% url 'view_applicants' job.id %}" class="btn btn-sm btn-outline-success">👥 Applicants</a>
+                    <a href="{% url 'edit_job' job.id %}" class="btn btn-sm btn-outline-warning">✏️ Edit</a>
+                    <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-outline-danger"
+                       onclick="return confirm('Are you sure you want to delete this job post?');">🗑️ Delete</a>
+                  </div>
                 </div>
               </div>
             </div>
           {% endfor %}
         </div>
       {% else %}
-        <div class="alert alert-info">You haven't posted any jobs yet.</div>
+        <div class="alert alert-info text-center">You haven't posted any jobs yet.</div>
       {% endif %}
     </div>
   </div>

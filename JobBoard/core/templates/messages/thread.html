@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+  <h3 class="mb-4 text-center">Conversation with {{ other_user.username }}</h3>
+
+  <div class="card mb-4">
+    <div class="card-body">
+      {% for msg in messages %}
+        <div class="mb-3 {% if msg.sender == user %}text-end{% endif %}">
+          <p class="mb-1"><strong>{{ msg.sender.username }}</strong> <small class="text-muted">({{ msg.sent_at|date:"M d, H:i" }})</small></p>
+          <div class="p-2 rounded bg-light d-inline-block">
+            {{ msg.body }}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Send Reply</button>
+  </form>
+</div>
+{% endblock %}

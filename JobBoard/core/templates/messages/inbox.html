@@ -1,17 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Inbox</h2>
-<ul class="list-group mt-3">
-  {% for msg in messages %}
-    <li class="list-group-item">
-      <strong>From:</strong> {{ msg.sender.username }}<br>
-      <strong>Subject:</strong> {{ msg.subject }}<br>
-      <small>{{ msg.sent_at }}</small>
-      <p>{{ msg.body }}</p>
-    </li>
-  {% empty %}
-    <li class="list-group-item">No messages.</li>
-  {% endfor %}
-</ul>
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">📥 Inbox</h2>
+
+  {% if messages %}
+    <div class="list-group">
+      {% for msg in messages %}
+        <div class="list-group-item list-group-item-action mb-3 shadow-sm">
+          <div class="d-flex w-100 justify-content-between">
+            <a href="{% url 'message_thread' msg.thread_id %}" class="list-group-item list-group-item-action mb-3 shadow-sm">
+              <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ msg.subject }}</h5>
+                <small>{{ msg.sent_at|date:"M d, Y H:i" }}</small>
+              </div>
+              <p class="mb-1"><strong>From:</strong> {{ msg.sender.username }}</p>
+              <p class="mb-0">{{ msg.body|truncatewords:20 }}</p>
+            </a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center">No messages yet.</div>
+  {% endif %}
+</div>
 {% endblock %}

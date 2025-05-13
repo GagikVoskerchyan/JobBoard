@@ -2,14 +2,15 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h2 class="mb-4 text-center">Available Jobs</h2>
+  <h2 class="mb-4 text-center">Browse Job Opportunities</h2>
 
-  <!-- 🔍 Search and Filter Form -->
-  <form method="GET" class="row g-3 mb-4">
-    <div class="col-md-3">
-      <input type="text" name="q" class="form-control" placeholder="Search job titles..." value="{{ request.GET.q }}">
+  <form method="GET" class="row g-3 mb-5 align-items-end">
+    <div class="col-12 col-md-3">
+      <label class="form-label">Keyword</label>
+      <input type="text" name="q" class="form-control" placeholder="Search titles..." value="{{ request.GET.q }}">
     </div>
-    <div class="col-md-2">
+    <div class="col-12 col-md-2">
+      <label class="form-label">Category</label>
       <select name="category" class="form-select">
         <option value="">All Categories</option>
         {% for key, value in categories %}
@@ -17,40 +18,43 @@
         {% endfor %}
       </select>
     </div>
-    <div class="col-md-2">
+    <div class="col-12 col-md-2">
+      <label class="form-label">Location</label>
       <input type="text" name="location" class="form-control" placeholder="Location" value="{{ request.GET.location }}">
     </div>
-    <div class="col-md-2">
+    <div class="col-12 col-md-2">
+      <label class="form-label">Company</label>
       <input type="text" name="company" class="form-control" placeholder="Company" value="{{ request.GET.company }}">
     </div>
-    <div class="col-md-2">
-      <button type="submit" class="btn btn-primary w-100">Search</button>
+    <div class="col-12 col-md-3">
+      <button type="submit" class="btn btn-primary w-100">🔍 Search Jobs</button>
     </div>
   </form>
 
-  <!-- 📄 Job List -->
   {% if jobs %}
-  <ul class="list-group shadow-sm">
-    {% for job in jobs %}
-      <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-        <div>
-          <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark">
-            <h5 class="mb-1">{{ job.title }}</h5>
-            <p class="mb-0 text-muted">{{ job.company }} — {{ job.location }}</p>
-            <small class="text-muted">Category: {{ job.category }}</small>
-          </a>
-          <!-- ✅ Save Job Button -->
-          <div class="mt-2">
-            <a href="{% url 'save_job' job.id %}" class="btn btn-sm btn-outline-success">Save Job</a>
+    <div class="list-group shadow-sm">
+      {% for job in jobs %}
+        <div class="list-group-item py-3">
+          <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+            <div>
+              <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark">
+                <h5 class="mb-1">{{ job.title }}</h5>
+                <p class="mb-1 text-muted">{{ job.company }} — {{ job.location }}</p>
+                <small class="text-muted">Category: {{ job.category }}</small>
+              </a>
+              <div class="mt-2">
+                <a href="{% url 'save_job' job.id %}" class="btn btn-sm btn-outline-success me-2">💾 Save Job</a>
+                <a href="{% url 'job_detail' job.id %}" class="btn btn-sm btn-outline-primary">🔍 View Details</a>
+              </div>
+            </div>
           </div>
         </div>
-        <span class="badge bg-primary rounded-pill">View</span>
-      </li>
-    {% endfor %}
-  </ul>
-{% else %}
-  <div class="alert alert-info text-center" role="alert">
-    No jobs found. Try adjusting your filters.
-  </div>
-{% endif %}
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="alert alert-info text-center mt-5" role="alert">
+      No jobs found. Try adjusting your filters or search keywords.
+    </div>
+  {% endif %}
+</div>
 {% endblock %}

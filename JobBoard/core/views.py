@@ -10,7 +10,6 @@ from django.contrib.auth.models import User
 from django.http import HttpResponseForbidden
 
 
-
 from .forms import RegisterForm, JobForm, ApplicationForm, ProfileForm, MessageForm, EmployerProfileForm
 from .models import Job, Application, Profile
 from .models import EmployerProfile, SeekerProfile
@@ -38,7 +37,7 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return render(request, 'core/logout.html')
+    return redirect('login')
 
 def home_view(request):
     jobs = Job.objects.all().order_by('-date_posted')
@@ -73,14 +72,33 @@ def job_detail_view(request, job_id):
         if form.is_valid():
             application = form.save(commit=False)
             application.job = job
-            application.user = request.user  
+            application.user = request.user
             application.save()
+
+            # Send email to employer
+            if job.posted_by.email:
+                send_mail(
+                    subject=f"New Application for {job.title}",
+                    message=f"{request.user.username} has applied to your job posting: {job.title}.",
+                    from_email=None,
+                    recipient_list=[job.posted_by.email],
+                )
+
+            # Send confirmation to seeker
+            send_mail(
+                subject="Application Submitted",
+                message=f"Hi {request.user.username},\n\nYou've successfully applied to {job.title} at {job.company}.",
+                from_email=None,
+                recipient_list=[request.user.email],
+            )
+
             messages.success(request, "Application submitted successfully!")
             return redirect('job_detail', job_id=job.id)
     else:
         form = ApplicationForm()
 
     return render(request, 'core/job_detail.html', {'job': job, 'form': form})
+
 
 
 def application_list_view(request):
@@ -117,7 +135,7 @@ def register_view(request):
     return render(request, 'core/register.html', {'form': form})
 
 def landing_page(request):
-    return render(request, 'core/landing_page.html')  # create this template
+    return render(request, 'core/landing_page.html')  
 
 def profile_view(request):
     profile = request.user.profile
@@ -233,32 +251,70 @@ def delete_job(request, job_id):
     return render(request, 'jobs/delete_job.html', {'job': job})
 
 @login_required
+def message_thread(request, thread_id):
+    thread_messages = Message.objects.filter(thread_id=thread_id).order_by('sent_at')
+
+    other_user = None
+    for msg in thread_messages:
+        if msg.sender != request.user:
+            other_user = msg.sender
+            break
+
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            Message.objects.create(
+                sender=request.user,
+                recipient=other_user,
+                subject=f"Re: {thread_messages.first().subject}",
+                body=form.cleaned_data['message'],
+                thread_id=thread_id
+            )
+            return redirect('message_thread', thread_id=thread_id)
+    else:
+        form = MessageForm()
+
+    return render(request, 'messages/thread.html', {
+        'messages': thread_messages,
+        'form': form,
+        'other_user': other_user
+    })
+
+import uuid
+
+@login_required
 def message_applicant(request, applicant_id):
     applicant = get_object_or_404(User, id=applicant_id)
     if request.method == 'POST':
         form = MessageForm(request.POST)
         if form.is_valid():
-            subject = form.cleaned_data['subject']
-            body = form.cleaned_data['message']
-
-            Message.objects.create(
+            thread_id = uuid.uuid4()
+            message = Message.objects.create(
                 sender=request.user,
                 recipient=applicant,
-                subject=subject,
-                body=body,
+                subject=form.cleaned_data['subject'],
+                body=form.cleaned_data['message'],
+                thread_id=thread_id
             )
-
-            messages.success(request, "Message sent!")
-            return redirect('employer_dashboard')
+            return redirect('message_thread', thread_id=message.thread_id)
     else:
         form = MessageForm()
 
     return render(request, 'applications/message_applicant.html', {'form': form, 'applicant': applicant})
 
 @login_required
+def sent_messages(request):
+    messages_sent = Message.objects.filter(sender=request.user).order_by('-sent_at')
+    return render(request, 'messages/sent.html', {'messages': messages_sent})
+
+@login_required
 def inbox(request):
-    messages = Message.objects.filter(recipient=request.user).order_by('-sent_at')
-    return render(request, 'messages/inbox.html', {'messages': messages})
+    messages_received = Message.objects.filter(recipient=request.user).order_by('-sent_at')
+
+    # Mark all as read
+    messages_received.update(is_read=True)
+
+    return render(request, 'messages/inbox.html', {'messages': messages_received})
 
 
 @login_required
