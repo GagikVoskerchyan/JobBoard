@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h3>Withdraw Application</h3>
+  <p>Are you sure you want to withdraw your application to <strong>{{ application.job.title }}</strong> at <strong>{{ application.job.company }}</strong>?</p>
+
+  <form method="POST">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Yes, Withdraw</button>
+    <a href="{% url 'application_list' %}" class="btn btn-secondary">Cancel</a>
+  </form>
+</div>
+{% endblock %}

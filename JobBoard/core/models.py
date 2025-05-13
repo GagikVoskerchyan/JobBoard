@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.core.validators import FileExtensionValidator
-
+    
 
 class Job(models.Model):
     CATEGORY_CHOICES = [
@@ -65,9 +65,14 @@ class Message(models.Model):
     def __str__(self):
         return f"From {self.sender.username} to {self.recipient.username}: {self.subject}"
 
+class SavedJob(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    saved_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('user', 'job')
 
-# ✅ NEW: Separate seeker and employer profiles
 class SeekerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
 
@@ -77,6 +82,9 @@ class SeekerProfile(models.Model):
 
 class EmployerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    company_name = models.CharField(max_length=255, blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
+    logo = models.ImageField(upload_to='company_logos/', blank=True, null=True)
 
     def __str__(self):
         return f"EmployerProfile: {self.user.username}"

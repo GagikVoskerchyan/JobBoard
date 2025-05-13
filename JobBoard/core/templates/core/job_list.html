@@ -3,25 +3,54 @@
 {% block content %}
 <div class="container mt-5">
   <h2 class="mb-4 text-center">Available Jobs</h2>
-  
-  {% if jobs %}
-    <ul class="list-group shadow-sm">
-      {% for job in jobs %}
-        <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-          <div>
-            <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark">
-              <h5 class="mb-1">{{ job.title }}</h5>
-              <p class="mb-0 text-muted">{{ job.company }} — {{ job.location }}</p>
-            </a>
-          </div>
-          <span class="badge bg-primary rounded-pill">View</span>
-        </li>
-      {% endfor %}
-    </ul>
-  {% else %}
-    <div class="alert alert-info text-center" role="alert">
-      No jobs available right now. Please check back later.
+
+  <!-- 🔍 Search and Filter Form -->
+  <form method="GET" class="row g-3 mb-4">
+    <div class="col-md-3">
+      <input type="text" name="q" class="form-control" placeholder="Search job titles..." value="{{ request.GET.q }}">
     </div>
-  {% endif %}
-</div>
+    <div class="col-md-2">
+      <select name="category" class="form-select">
+        <option value="">All Categories</option>
+        {% for key, value in categories %}
+          <option value="{{ key }}" {% if request.GET.category == key %}selected{% endif %}>{{ value }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-2">
+      <input type="text" name="location" class="form-control" placeholder="Location" value="{{ request.GET.location }}">
+    </div>
+    <div class="col-md-2">
+      <input type="text" name="company" class="form-control" placeholder="Company" value="{{ request.GET.company }}">
+    </div>
+    <div class="col-md-2">
+      <button type="submit" class="btn btn-primary w-100">Search</button>
+    </div>
+  </form>
+
+  <!-- 📄 Job List -->
+  {% if jobs %}
+  <ul class="list-group shadow-sm">
+    {% for job in jobs %}
+      <li class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+        <div>
+          <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark">
+            <h5 class="mb-1">{{ job.title }}</h5>
+            <p class="mb-0 text-muted">{{ job.company }} — {{ job.location }}</p>
+            <small class="text-muted">Category: {{ job.category }}</small>
+          </a>
+          <!-- ✅ Save Job Button -->
+          <div class="mt-2">
+            <a href="{% url 'save_job' job.id %}" class="btn btn-sm btn-outline-success">Save Job</a>
+          </div>
+        </div>
+        <span class="badge bg-primary rounded-pill">View</span>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="alert alert-info text-center" role="alert">
+    No jobs found. Try adjusting your filters.
+  </div>
+{% endif %}
 {% endblock %}

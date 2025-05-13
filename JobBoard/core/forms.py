@@ -4,6 +4,8 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import Job
 from .models import Application
 from .models import Profile
+from .models import EmployerProfile
+
 
 
 class RegisterForm(UserCreationForm):
@@ -44,3 +46,9 @@ class ProfileForm(forms.ModelForm):
 class MessageForm(forms.Form):
     subject = forms.CharField(max_length=100)
     message = forms.CharField(widget=forms.Textarea)
+
+
+class EmployerProfileForm(forms.ModelForm):
+    class Meta:
+        model = EmployerProfile
+        fields = ['company_name', 'description', 'logo']

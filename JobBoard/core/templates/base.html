@@ -26,6 +26,7 @@
                 {% else %}
                   <li class="nav-item"><a class="nav-link" href="{% url 'seeker_dashboard' %}">Dashboard</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'application_list' %}">My Applications</a></li>
+                  <li class="nav-item"><a class="nav-link" href="{% url 'saved_jobs' %}">Saved Jobs</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'inbox' %}">Inbox</a></li>
                 {% endif %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'logout' %}">Logout</a></li>

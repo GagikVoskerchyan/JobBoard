@@ -17,6 +17,10 @@
       {% else %}
         <span class="text-muted mt-2 d-block">You didn’t upload a resume.</span>
       {% endif %}
+
+      <a href="{% url 'withdraw_application' app.id %}" class="btn btn-sm btn-danger mt-2 ms-2">
+        Withdraw
+      </a>
     </li>
   {% empty %}
     <li class="list-group-item">You haven’t submitted any applications yet.</li>

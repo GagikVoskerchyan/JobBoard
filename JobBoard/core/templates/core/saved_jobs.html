@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="mb-4">Saved Jobs</h2>
+
+  {% if saved_jobs %}
+    <ul class="list-group shadow-sm">
+      {% for saved in saved_jobs %}
+        <li class="list-group-item list-group-item-action">
+          <a href="{% url 'job_detail' saved.job.id %}" class="text-decoration-none text-dark">
+            <h5 class="mb-1">{{ saved.job.title }}</h5>
+            <p class="mb-0 text-muted">{{ saved.job.company }} — {{ saved.job.location }}</p>
+            <small class="text-muted">Category: {{ saved.job.category }}</small>
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div class="alert alert-info text-center">You haven’t saved any jobs yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

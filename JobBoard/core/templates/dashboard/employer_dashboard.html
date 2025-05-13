@@ -3,8 +3,8 @@
 {% block content %}
 <div class="container mt-5">
 
-  <!-- Profile Card -->
   <div class="row mb-4">
+    <!-- Profile + Company Info -->
     <div class="col-md-4">
       <div class="card mb-4 shadow-sm">
         {% if user.profile.profile_picture %}
@@ -15,11 +15,25 @@
         <div class="card-body">
           <h5 class="card-title">{{ user.username }}</h5>
           <p class="card-text">{{ user.profile.bio }}</p>
-          <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm">Edit Profile</a>
+          <a href="{% url 'edit_profile' %}" class="btn btn-outline-primary btn-sm mb-2">Edit Profile</a>
+
+          {% with user.employerprofile as employer %}
+            {% if employer.company_name %}
+              <p><strong>Company:</strong> {{ employer.company_name }}</p>
+            {% endif %}
+            {% if employer.description %}
+              <p>{{ employer.description }}</p>
+            {% endif %}
+            {% if employer.logo %}
+              <img src="{{ employer.logo.url }}" alt="Company Logo" class="img-fluid mt-2">
+            {% endif %}
+            <a href="{% url 'edit_employer_profile' %}" class="btn btn-sm btn-outline-primary mt-2">Edit Company Info</a>
+          {% endwith %}
         </div>
       </div>
     </div>
 
+    <!-- Posted Jobs -->
     <div class="col-md-8">
       <h2 class="mb-4">Jobs You Posted</h2>
 

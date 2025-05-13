@@ -7,13 +7,14 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
 from django.core.mail import send_mail
 from django.contrib.auth.models import User
+from django.http import HttpResponseForbidden
 
 
-from .forms import RegisterForm, JobForm, ApplicationForm, ProfileForm, MessageForm
+
+from .forms import RegisterForm, JobForm, ApplicationForm, ProfileForm, MessageForm, EmployerProfileForm
 from .models import Job, Application, Profile
 from .models import EmployerProfile, SeekerProfile
-from .models import Message  # add this import
-
+from .models import Message, SavedJob
 
 class ApplicationListView(LoginRequiredMixin, ListView):
     model = Application
@@ -22,9 +23,6 @@ class ApplicationListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Application.objects.filter(user=self.request.user)
-
-def home_view(request):
-    return render(request, 'core/home.html')
 
 
 def login_view(request):
@@ -44,7 +42,28 @@ def logout_view(request):
 
 def home_view(request):
     jobs = Job.objects.all().order_by('-date_posted')
-    return render(request, 'core/job_list.html', {'jobs': jobs})
+
+    query = request.GET.get('q')
+    category = request.GET.get('category')
+    location = request.GET.get('location')
+    company = request.GET.get('company')
+
+    if query:
+        jobs = jobs.filter(title__icontains=query) 
+    if category:
+        jobs = jobs.filter(category=category)
+    if location:
+        jobs = jobs.filter(location__icontains=location)
+    if company:
+        jobs = jobs.filter(company__icontains=company)
+
+    categories = Job.CATEGORY_CHOICES
+
+    return render(request, 'core/job_list.html', {
+        'jobs': jobs,
+        'categories': categories,
+    })
+
 
 def job_detail_view(request, job_id):
     job = get_object_or_404(Job, id=job_id)
@@ -54,7 +73,7 @@ def job_detail_view(request, job_id):
         if form.is_valid():
             application = form.save(commit=False)
             application.job = job
-            application.user = request.user  # ✅ FIX HERE
+            application.user = request.user  
             application.save()
             messages.success(request, "Application submitted successfully!")
             return redirect('job_detail', job_id=job.id)
@@ -114,16 +133,20 @@ def profile_view(request):
 
 @login_required
 def post_job_view(request):
+    if request.user.profile.user_type != 'employer':
+        return HttpResponseForbidden("Only employers can post jobs.")
+
     if request.method == 'POST':
         form = JobForm(request.POST)
         if form.is_valid():
             job = form.save(commit=False)
             job.posted_by = request.user
             job.save()
-            return redirect('home')
+            return redirect('employer_dashboard')
     else:
         form = JobForm()
     return render(request, 'core/post_job.html', {'form': form})
+
 
 @login_required
 def redirect_dashboard(request):
@@ -181,6 +204,9 @@ def view_applicants(request, job_id):
 def edit_job(request, job_id):
     job = get_object_or_404(Job, id=job_id, posted_by=request.user)
 
+    if request.user.profile.user_type != 'employer':
+        return HttpResponseForbidden("Only employers can edit jobs.")
+
     if request.method == 'POST':
         form = JobForm(request.POST, instance=job)
         if form.is_valid():
@@ -192,9 +218,13 @@ def edit_job(request, job_id):
     return render(request, 'jobs/edit_job.html', {'form': form})
 
 
+
 @login_required
 def delete_job(request, job_id):
     job = get_object_or_404(Job, id=job_id, posted_by=request.user)
+
+    if request.user.profile.user_type != 'employer':
+        return HttpResponseForbidden("Only employers can delete jobs.")
 
     if request.method == 'POST':
         job.delete()
@@ -229,3 +259,41 @@ def message_applicant(request, applicant_id):
 def inbox(request):
     messages = Message.objects.filter(recipient=request.user).order_by('-sent_at')
     return render(request, 'messages/inbox.html', {'messages': messages})
+
+
+@login_required
+def withdraw_application(request, application_id):
+    application = get_object_or_404(Application, id=application_id, user=request.user)
+    if request.method == 'POST':
+        application.delete()
+        messages.success(request, "Your application has been withdrawn.")
+        return redirect('application_list')
+    return render(request, 'core/confirm_withdraw.html', {'application': application})
+
+
+@login_required
+def save_job(request, job_id):
+    job = get_object_or_404(Job, id=job_id)
+    SavedJob.objects.get_or_create(user=request.user, job=job)
+    messages.success(request, "Job saved!")
+    return redirect('home')
+
+@login_required
+def saved_jobs_list(request):
+    saved_jobs = SavedJob.objects.filter(user=request.user).select_related('job')
+    return render(request, 'core/saved_jobs.html', {'saved_jobs': saved_jobs})
+
+
+@login_required
+def edit_employer_profile(request):
+    employer_profile = get_object_or_404(EmployerProfile, user=request.user)
+
+    if request.method == 'POST':
+        form = EmployerProfileForm(request.POST, request.FILES, instance=employer_profile)
+        if form.is_valid():
+            form.save()
+            return redirect('employer_dashboard')
+    else:
+        form = EmployerProfileForm(instance=employer_profile)
+
+    return render(request, 'core/edit_employer_profile.html', {'form': form})
