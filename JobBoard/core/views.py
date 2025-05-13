@@ -311,7 +311,6 @@ def sent_messages(request):
 def inbox(request):
     messages_received = Message.objects.filter(recipient=request.user).order_by('-sent_at')
 
-    # Mark all as read
     messages_received.update(is_read=True)
 
     return render(request, 'messages/inbox.html', {'messages': messages_received})
